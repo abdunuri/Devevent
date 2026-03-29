@@ -1,0 +1,17 @@
+{
+  "RAFCE lowercase page": {
+    "prefix": "rafce",
+    "body": [
+      "const page = () => {",
+      "  return (",
+      "    <div>",
+      "      $1",
+      "    </div>",
+      "  );",
+      "};",
+      "",
+      "export default page;"
+    ],
+    "description": "Generate lowercase page component"
+  }
+}
