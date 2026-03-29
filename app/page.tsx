@@ -5,7 +5,7 @@ import { events } from "@/lib/constants";
 const page = () => {
   return (
     <section>
-        <h1 className="text-center">The hub for every dev <br/>Event you can't miss</h1>
+        <h1 className="text-center">The hub for every Tech <br/>Event in Addis</h1>
         <p className="text-center mt-5">Hackathons, Meetups, and Conferences all in one place.</p>
 
         <ExploreBtn />

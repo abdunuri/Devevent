@@ -18,7 +18,7 @@ const martianMono = Martian_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DEV EVENT",
+  title: "TECHVENT",
   description: "The hub for developers to share and discover events",
 };
 
