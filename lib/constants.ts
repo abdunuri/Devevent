@@ -1,3 +1,4 @@
+
 export const events = [
   {
     image: "/images/event1.png",
