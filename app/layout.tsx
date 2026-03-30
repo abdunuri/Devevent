@@ -1,22 +1,9 @@
 import type { Metadata } from "next";
 import LightRays from "@/components/LightRays";
-import { Schibsted_Grotesk, Martian_Mono, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import NavBar from "@/components/NavBar";
 import PostHogProvider from "@/components/PostHogProvider";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-const schibstedGrotesk = Schibsted_Grotesk({
-  variable: "--font-schibsted-grotesk",
-  subsets: ["latin"],
-});
-
-const martianMono = Martian_Mono({
-  variable: "--font-martian-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "TECHVENT",
@@ -31,7 +18,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", schibstedGrotesk.variable, martianMono.variable, "font-sans", geist.variable)}>
+      className={cn("h-full", "antialiased", "font-sans")}>
       <body className="min-h-full flex flex-col min-h-screen">
       <PostHogProvider>
       <NavBar />
