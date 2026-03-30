@@ -7,8 +7,6 @@ if (!mongoDbUri) {
 }
 const MONGODB_URI: string = mongoDbUri;
 
-const MONGODB_URI: string = mongoDbUri;
-
 interface MongooseCache {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;
