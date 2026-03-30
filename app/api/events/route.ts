@@ -4,6 +4,65 @@ import { Event } from "@/database/event.model";
 
 type EventPayload = Record<string, unknown>;
 
+const REQUIRED_FIELDS = [
+    "title",
+    "description",
+    "overview",
+    "image",
+    "venue",
+    "location",
+    "date",
+    "time",
+    "mode",
+    "audience",
+    "agenda",
+    "organizer",
+    "tags",
+] as const;
+
+const ALLOWED_FIELDS = new Set(REQUIRED_FIELDS);
+
+interface CreateEventInput {
+    title: string;
+    slug: string;
+    description: string;
+    overview: string;
+    image: string;
+    venue: string;
+    location: string;
+    date: string;
+    time: string;
+    mode: string;
+    audience: string;
+    agenda: string[];
+    organizer: string;
+    tags: string[];
+}
+
+function slugifyTitle(title: string): string {
+    return title
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+}
+
+function getRequiredString(payload: EventPayload, fieldName: keyof CreateEventInput): string {
+    const value = payload[fieldName];
+    if (typeof value !== "string") {
+        throw new Error(`Invalid payload: \"${fieldName}\" must be a string.`);
+    }
+
+    const normalized = value.trim();
+    if (!normalized) {
+        throw new Error(`Invalid payload: \"${fieldName}\" is required.`);
+    }
+
+    return normalized;
+}
+
 function parseListField(value: unknown): string[] {
     if (Array.isArray(value)) {
         return value.map((item) => String(item).trim()).filter(Boolean);
@@ -60,15 +119,61 @@ async function parseEventPayload(req: NextRequest): Promise<EventPayload> {
     );
 }
 
+function normalizeEventPayload(payload: EventPayload): CreateEventInput {
+    const unsupportedFields = Object.keys(payload).filter(
+        (field) => !ALLOWED_FIELDS.has(field as (typeof REQUIRED_FIELDS)[number])
+    );
+    if (unsupportedFields.length > 0) {
+        throw new Error(`Unsupported fields: ${unsupportedFields.join(", ")}.`);
+    }
+
+    const missingFields = REQUIRED_FIELDS.filter((field) => payload[field] === undefined);
+    if (missingFields.length > 0) {
+        throw new Error(`Missing required fields: ${missingFields.join(", ")}.`);
+    }
+
+    const title = getRequiredString(payload, "title");
+    const slug = slugifyTitle(title);
+    if (!slug) {
+        throw new Error("Invalid payload: title could not be converted to a slug.");
+    }
+
+    const agenda = parseListField(payload.agenda);
+    if (agenda.length === 0) {
+        throw new Error("Invalid payload: \"agenda\" must contain at least one item.");
+    }
+
+    const tags = parseListField(payload.tags);
+    if (tags.length === 0) {
+        throw new Error("Invalid payload: \"tags\" must contain at least one item.");
+    }
+
+    return {
+        title,
+        slug,
+        description: getRequiredString(payload, "description"),
+        overview: getRequiredString(payload, "overview"),
+        image: getRequiredString(payload, "image"),
+        venue: getRequiredString(payload, "venue"),
+        location: getRequiredString(payload, "location"),
+        date: getRequiredString(payload, "date"),
+        time: getRequiredString(payload, "time"),
+        mode: getRequiredString(payload, "mode"),
+        audience: getRequiredString(payload, "audience"),
+        agenda,
+        organizer: getRequiredString(payload, "organizer"),
+        tags,
+    };
+}
+
 export async function POST(req: NextRequest) {
     try {
         await connectToDatabase();
 
         const payload = await parseEventPayload(req);
-        payload.agenda = parseListField(payload.agenda);
-        payload.tags = parseListField(payload.tags);
+        const normalizedPayload = normalizeEventPayload(payload);
 
-        const createdEvent = await Event.create(payload);
+        const createdEvent = await Event.create(normalizedPayload);
         return NextResponse.json(
             { message: "Event created successfully", event: createdEvent },
             { status: 201 }
@@ -77,6 +182,19 @@ export async function POST(req: NextRequest) {
         console.error(e);
 
         const errorMessage = e instanceof Error ? e.message : "unknown";
+        const duplicateSlugError =
+            typeof e === "object" &&
+            e !== null &&
+            "code" in e &&
+            (e as { code?: number }).code === 11000;
+
+        if (duplicateSlugError) {
+            return NextResponse.json(
+                { message: "Event creation failed", error: "An event with this title already exists." },
+                { status: 409 }
+            );
+        }
+
         if (/querySrv\s+ECONNREFUSED/i.test(errorMessage)) {
             return NextResponse.json(
                 {
@@ -89,7 +207,7 @@ export async function POST(req: NextRequest) {
         }
 
         const status =
-            /invalid json payload|unsupported content type/i.test(errorMessage)
+            /invalid payload|missing required fields|unsupported fields|invalid json payload|unsupported content type/i.test(errorMessage)
                 ? 400
                 : 500;
 
