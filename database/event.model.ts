@@ -120,8 +120,6 @@ const eventSchema = new Schema<IEvent, EventModelType>(
   }
 );
 
-eventSchema.index({ slug: 1 }, { unique: true });
-
 eventSchema.pre("save", function preSaveNormalizeEvent(this: EventDocument) {
   for (const fieldName of REQUIRED_STRING_FIELDS) {
     const value = ensureNonEmpty(this[fieldName], fieldName);
