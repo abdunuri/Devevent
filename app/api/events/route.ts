@@ -1,8 +1,18 @@
 import connectToDatabase from "@/lib/mongodb";
 import { NextRequest, NextResponse } from "next/server";
+import {
+    v2 as cloudinary,
+    type UploadApiErrorResponse,
+    type UploadApiResponse,
+} from "cloudinary";
 import { Event } from "@/database/event.model";
 
 type EventPayload = Record<string, unknown>;
+
+interface ParsedEventPayload {
+    payload: EventPayload;
+    formData?: FormData;
+}
 
 const REQUIRED_FIELDS = [
     "title",
@@ -94,7 +104,7 @@ function parseListField(value: unknown): string[] {
     return [];
 }
 
-async function parseEventPayload(req: NextRequest): Promise<EventPayload> {
+async function parseEventPayload(req: NextRequest): Promise<ParsedEventPayload> {
     const contentType = req.headers.get("content-type")?.toLowerCase() ?? "";
 
     if (contentType.includes("application/json")) {
@@ -103,7 +113,7 @@ async function parseEventPayload(req: NextRequest): Promise<EventPayload> {
             throw new Error("Invalid JSON payload. Expected a JSON object.");
         }
 
-        return body as EventPayload;
+        return { payload: body as EventPayload };
     }
 
     if (
@@ -111,7 +121,10 @@ async function parseEventPayload(req: NextRequest): Promise<EventPayload> {
         contentType.includes("application/x-www-form-urlencoded")
     ) {
         const formData = await req.formData();
-        return Object.fromEntries(formData.entries());
+        return {
+            payload: Object.fromEntries(formData.entries()),
+            formData,
+        };
     }
 
     throw new Error(
@@ -170,7 +183,54 @@ export async function POST(req: NextRequest) {
     try {
         await connectToDatabase();
 
-        const payload = await parseEventPayload(req);
+        const { payload, formData } = await parseEventPayload(req);
+
+        if (formData) {
+            const imageField = formData.get("image");
+            if (imageField instanceof File) {
+                if (imageField.size === 0) {
+                    return NextResponse.json(
+                        { message: "Event creation failed", error: "Image file is empty." },
+                        { status: 400 }
+                    );
+                }
+
+                const arrayBuffer = await imageField.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
+                const uploadResult = await new Promise<UploadApiResponse>((resolve, reject) => {
+                    cloudinary.uploader
+                        .upload_stream(
+                            { resource_type: "image", folder: "techvent" },
+                            (
+                                error: UploadApiErrorResponse | undefined,
+                                result: UploadApiResponse | undefined
+                            ) => {
+                                if (error) {
+                                    reject(error);
+                                } else if (result) {
+                                    resolve(result);
+                                } else {
+                                    reject(new Error("Image upload failed."));
+                                }
+                            }
+                        )
+                        .end(buffer);
+                });
+
+                payload.image = uploadResult.secure_url;
+            } else if (typeof imageField === "string" && imageField.trim()) {
+                payload.image = imageField.trim();
+            } else if (typeof payload.image !== "string") {
+                return NextResponse.json(
+                    {
+                        message: "Event creation failed",
+                        error: "Image is required. Send an image file in form-data or an image URL string.",
+                    },
+                    { status: 400 }
+                );
+            }
+        }
+
         const normalizedPayload = normalizeEventPayload(payload);
 
         const createdEvent = await Event.create(normalizedPayload);
@@ -217,3 +277,17 @@ export async function POST(req: NextRequest) {
         );
     }
 }
+
+
+export async function GET() {
+    try {
+        await connectToDatabase();
+        const events = await Event.find().sort({ createdAt: -1 });
+        return NextResponse.json({message: "Events retrieved successfully", events }, { status: 200 });
+      }
+    catch (e) {
+        console.error(e);
+        return NextResponse.json({message: "Failed to connect to database", error: e instanceof Error ? e.message : "unknown"}, {status: 500});
+    }
+}
+
