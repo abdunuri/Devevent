@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import BookEvent from "@/components/BookEvent";
 import { getSimilarEventsBySlug } from "@/lib/actions/event.actions";
+import type { SimilarEventSummary } from "@/lib/actions/event.actions";
 import EventCard from "@/components/eventCard";
 
 function parseListField(value: unknown): string[] {
@@ -47,12 +48,11 @@ function getAppBaseUrl(): string {
   return "http://localhost:3000";
 }
 const EventDetailItem = ({ icon, alt, label }: { icon: string; alt: string; label: string }) => (
-  <div className="flex-row-gap-2 items-center ">
+  <div className="flex flex-row gap-2 items-center">
     <Image src={icon} alt={alt} width={20} height={20} />
     <span>{label}</span>
   </div>
 );
-
 const EventAgenda= ({ agenda }: { agenda: string[] }) => (
   <div className="agenda">
     <h2>Agenda</h2>
@@ -149,7 +149,7 @@ const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> 
 
   const agenda = parseListField(rawAgenda);
   const tags = parseListField(rawTags);
-  const similarEvents = await getSimilarEventsBySlug(slug);
+  const similarEvents: SimilarEventSummary[] = await getSimilarEventsBySlug(slug);
 
 
   return (
