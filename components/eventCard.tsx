@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { formatEventDate, formatEventTime } from "@/lib/utils";
 
 interface Props {
     title: string;
@@ -11,6 +12,9 @@ interface Props {
 }
 
 const eventCard = ({ title ,image,slug,location,date,time}:Props) => {
+  const formattedDate = formatEventDate(date);
+  const formattedTime = formatEventTime(time);
+
   return (
     <Link href={`/events/${slug}`} id="event-card">
       <Image src={image} alt={title} width={410} height={300} className="poster" />
@@ -21,9 +25,9 @@ const eventCard = ({ title ,image,slug,location,date,time}:Props) => {
       <p className="title">{title}</p>
       <div className="datetime">
         <Image src="/icons/calendar.svg" alt="Location" width={20} height={20} />
-        <p>{date}</p>
+        <p>{formattedDate}</p>
         <Image src="/icons/clock.svg" alt="Time" width={20} height={20} />
-        <p >{time}</p>
+        <p >{formattedTime}</p>
       </div>
 
     </Link>

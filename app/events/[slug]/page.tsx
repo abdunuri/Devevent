@@ -4,6 +4,7 @@ import BookEvent from "@/components/BookEvent";
 import { getSimilarEventsBySlug } from "@/lib/actions/event.actions";
 import type { SimilarEventSummary } from "@/lib/actions/event.actions";
 import EventCard from "@/components/eventCard";
+import { formatEventDate, formatEventTime } from "@/lib/utils";
 
 function parseListField(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -149,6 +150,8 @@ const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> 
 
   const agenda = parseListField(rawAgenda);
   const tags = parseListField(rawTags);
+  const formattedDate = formatEventDate(date);
+  const formattedTime = formatEventTime(time);
   const similarEvents: SimilarEventSummary[] = await getSimilarEventsBySlug(slug);
 
 
@@ -168,8 +171,8 @@ const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> 
           </section>
           <section className="flex-col gap-2">
             <h2>Event Details</h2>
-            <EventDetailItem icon="/icons/calendar.svg" alt="Date" label={date} />
-            <EventDetailItem icon="/icons/clock.svg" alt="Time" label={time} />
+            <EventDetailItem icon="/icons/calendar.svg" alt="Date" label={formattedDate} />
+            <EventDetailItem icon="/icons/clock.svg" alt="Time" label={formattedTime} />
             <EventDetailItem icon="/icons/pin.svg" alt="Location" label={location} />
             <EventDetailItem icon="/icons/mode.svg" alt="Mode" label={mode} />
             <EventDetailItem icon="/icons/audience.svg" alt="Audience" label={audience} />
