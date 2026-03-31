@@ -49,6 +49,23 @@ interface CreateEventInput {
     tags: string[];
 }
 
+function isAtlasConnectivityError(message: string): boolean {
+    return /querySrv\s+ECONNREFUSED|could not connect to any servers|replicasetnoprimary|whitelist|network access/i.test(
+        message
+    );
+}
+
+function atlasConnectivityErrorResponse(actionMessage: string) {
+    return NextResponse.json(
+        {
+            message: actionMessage,
+            error:
+                "Could not connect to MongoDB Atlas. Add your current IP to Atlas Network Access, verify the cluster is running, and confirm MONGODB_URI is correct.",
+        },
+        { status: 503 }
+    );
+}
+
 function slugifyTitle(title: string): string {
     return title
         .trim()
@@ -255,15 +272,8 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        if (/querySrv\s+ECONNREFUSED/i.test(errorMessage)) {
-            return NextResponse.json(
-                {
-                    message: "Database connection failed",
-                    error:
-                        "DNS SRV lookup to MongoDB Atlas was refused. Verify network DNS access or use the non-SRV MongoDB URI in MONGODB_URI.",
-                },
-                { status: 503 }
-            );
+        if (isAtlasConnectivityError(errorMessage)) {
+            return atlasConnectivityErrorResponse("Database connection failed");
         }
 
         const status =
@@ -287,7 +297,12 @@ export async function GET() {
       }
     catch (e) {
         console.error(e);
-        return NextResponse.json({message: "Failed to connect to database", error: e instanceof Error ? e.message : "unknown"}, {status: 500});
+        const errorMessage = e instanceof Error ? e.message : "unknown";
+        if (isAtlasConnectivityError(errorMessage)) {
+            return atlasConnectivityErrorResponse("Failed to connect to database");
+        }
+
+        return NextResponse.json({message: "Failed to connect to database", error: errorMessage}, {status: 500});
     }
 }
 

@@ -15,7 +15,11 @@ function getAppBaseUrl(): string {
 const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = await params;
 
-  let eventData: { error?: string } | null = null;
+  type EventDetails = {
+    description: string;
+  };
+
+  let eventData: { error?: string; event?: EventDetails } | null = null;
   try {
     const request = await fetch(`${getAppBaseUrl()}/api/events/${slug}`, {
       headers: {
@@ -33,18 +37,22 @@ const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> 
       return notFound();
     }
 
-    eventData = (await request.json()) as { error?: string };
+    eventData = (await request.json()) as { error?: string; event?: EventDetails };
   } catch {
     return notFound();
   }
 
-  if (!eventData || eventData.error) {
+  if (!eventData || eventData.error || !eventData.event) {
     return notFound();
   }
 
+
   return (
-    <section>
-      <h1>Event Details for: {slug}</h1>
+    <section id="event">
+      <div className="header">
+        <h1>Event Description</h1>
+        <p>{}</p>
+      </div>
     </section>
   );
 };

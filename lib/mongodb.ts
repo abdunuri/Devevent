@@ -38,6 +38,20 @@ export default async function connectToDatabase(): Promise<typeof mongoose> {
       .then((instance) => instance);
   }
 
-  cached.conn = await cached.promise;
-  return cached.conn;
+  try {
+    cached.conn = await cached.promise;
+    return cached.conn;
+  } catch (error) {
+    // Reset failed promise so subsequent requests can retry a fresh connection.
+    cached.promise = null;
+
+    const message = error instanceof Error ? error.message : "unknown";
+    if (/could not connect to any servers|replicasetnoprimary|whitelist/i.test(message)) {
+      throw new Error(
+        "Could not connect to MongoDB Atlas. Check Atlas Network Access (IP whitelist), cluster status, and MONGODB_URI."
+      );
+    }
+
+    throw error;
+  }
 }
