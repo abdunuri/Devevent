@@ -11,6 +11,45 @@ interface ErrorResponseBody {
   error: string;
 }
 
+function parseListField(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return [];
+    }
+
+    if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed.map((item) => String(item).trim()).filter(Boolean);
+        }
+      } catch {
+        // Fall through to comma-separated parsing.
+      }
+    }
+
+    return trimmed
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function normalizeEventArrays<T extends { agenda?: unknown; tags?: unknown }>(event: T) {
+  return {
+    ...event,
+    agenda: parseListField(event.agenda),
+    tags: parseListField(event.tags),
+  };
+}
+
 function isValidSlug(slug: string): boolean {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
 }
@@ -67,8 +106,10 @@ export async function GET(
       );
     }
 
+    const normalizedEvent = normalizeEventArrays(event);
+
     return NextResponse.json(
-      { message: "Event retrieved successfully", event },
+      { message: "Event retrieved successfully", event: normalizedEvent },
       { status: 200 }
     );
   } catch (error: unknown) {

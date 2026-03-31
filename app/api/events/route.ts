@@ -1,5 +1,7 @@
 import connectToDatabase from "@/lib/mongodb";
 import { NextRequest, NextResponse } from "next/server";
+// add unsplash source to next.config.js
+// images: { domains: ['images.unsplash.com'] }
 import {
     v2 as cloudinary,
     type UploadApiErrorResponse,
@@ -119,6 +121,14 @@ function parseListField(value: unknown): string[] {
     }
 
     return [];
+}
+
+function normalizeEventArrays<T extends { agenda?: unknown; tags?: unknown }>(event: T) {
+    return {
+        ...event,
+        agenda: parseListField(event.agenda),
+        tags: parseListField(event.tags),
+    };
 }
 
 async function parseEventPayload(req: NextRequest): Promise<ParsedEventPayload> {
@@ -292,8 +302,10 @@ export async function POST(req: NextRequest) {
 export async function GET() {
     try {
         await connectToDatabase();
-        const events = await Event.find().sort({ createdAt: -1 });
-        return NextResponse.json({message: "Events retrieved successfully", events }, { status: 200 });
+        const events = await Event.find().sort({ createdAt: -1 }).lean();
+        const normalizedEvents = events.map((event) => normalizeEventArrays(event));
+
+        return NextResponse.json({message: "Events retrieved successfully", events: normalizedEvents }, { status: 200 });
       }
     catch (e) {
         console.error(e);
