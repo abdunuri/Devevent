@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // add unsplash source to next.config.js
+  cacheComponents: true,
   images: {
     remotePatterns: [
       {

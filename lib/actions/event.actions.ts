@@ -1,4 +1,5 @@
 'use server'
+'use cache';
 
 import { Event } from "@/database/event.model";
 import connectToDatabase from "../mongodb";

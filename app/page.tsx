@@ -1,3 +1,4 @@
+'use cache';
 import ExploreBtn from "@/components/exploreBtn";
 import EventCard from "@/components/eventCard";
 // import { events } from "@/lib/constants";
