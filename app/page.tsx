@@ -1,6 +1,7 @@
-'use cache';
+
 import ExploreBtn from "@/components/exploreBtn";
 import EventCard from "@/components/eventCard";
+import { cacheLife } from "next/cache";
 // import { events } from "@/lib/constants";
 
 interface EventSummary {
@@ -50,6 +51,8 @@ async function getEvents(): Promise<EventSummary[]> {
 }
 
 const page = async() => {
+  'use cache';
+  cacheLife('hours'); // Revalidate this cached page data every hour
   const events = await getEvents();
 
   return (
