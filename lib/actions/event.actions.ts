@@ -1,5 +1,4 @@
 'use server'
-'use cache';
 
 import { Event } from "@/database/event.model";
 import connectToDatabase from "../mongodb";
@@ -15,6 +14,8 @@ export interface SimilarEventSummary {
 }
 
 export const getSimilarEventsBySlug = async (slug: string): Promise<SimilarEventSummary[]> => {
+  'use cache';
+
   try {
     await connectToDatabase();
     const event = await Event.findOne({ slug }).lean();

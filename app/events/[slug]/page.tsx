@@ -112,7 +112,6 @@ const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> 
       headers: {
         Accept: "application/json",
       },
-      cache: "no-store",
     });
 
     if (!request.ok) {
