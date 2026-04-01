@@ -17,6 +17,7 @@ function isValidEmail(email: string): boolean {
 
 export interface IBooking {
   eventId: Types.ObjectId;
+  slug: string;
   email: string;
   createdAt: Date;
   updatedAt: Date;
@@ -34,6 +35,7 @@ const bookingSchema = new Schema<IBooking, BookingModelType>(
       required: true,
       index: true,
     },
+    slug: { type: String, required: true, trim: true, lowercase: true },
     email: { type: String, required: true, trim: true, lowercase: true },
   },
   {
@@ -43,8 +45,11 @@ const bookingSchema = new Schema<IBooking, BookingModelType>(
 );
 
 bookingSchema.index({ eventId: 1 });
+bookingSchema.index({ slug: 1 });
 
 bookingSchema.pre("save", async function preSaveValidateBooking(this: BookingDocument) {
+  this.slug = ensureNonEmpty(this.slug, "slug").toLowerCase();
+
   const normalizedEmail = ensureNonEmpty(this.email, "email").toLowerCase();
   if (!isValidEmail(normalizedEmail)) {
     throw new Error(`Invalid email format: "${this.email}".`);
@@ -52,10 +57,12 @@ bookingSchema.pre("save", async function preSaveValidateBooking(this: BookingDoc
   this.email = normalizedEmail;
 
   // Validate referential integrity so bookings cannot target deleted/missing events.
-  if (this.isModified("eventId") || this.isNew) {
-    const eventExists = await Event.exists({ _id: this.eventId });
+  if (this.isModified("eventId") || this.isModified("slug") || this.isNew) {
+    const eventExists = await Event.exists({ _id: this.eventId, slug: this.slug });
     if (!eventExists) {
-      throw new Error(`Event with id "${this.eventId.toString()}" does not exist.`);
+      throw new Error(
+        `Event with id "${this.eventId.toString()}" and slug "${this.slug}" does not exist.`
+      );
     }
   }
 });

@@ -1,11 +1,12 @@
-'use cache';
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import BookEvent from "@/components/BookEvent";
+import { getBookingCountByEvent } from "@/lib/actions/booking.actions";
 import { getSimilarEventsBySlug } from "@/lib/actions/event.actions";
 import type { SimilarEventSummary } from "@/lib/actions/event.actions";
 import EventCard from "@/components/eventCard";
 import { formatEventDate, formatEventTime } from "@/lib/utils";
+import { Suspense } from "react";
 
 function parseListField(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -84,13 +85,11 @@ const EventTags = ({ tags }: { tags: string[] }) => (
 
   </div>
 );
-
-
-const booking=10;
-const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
+const EventDetailsContent = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = await params;
 
   type EventDetails = {
+    _id: string;
     title: string;
     description: string;
     overview: string;
@@ -133,6 +132,7 @@ const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> 
   }
 
   const {
+    _id,
     title,
     description,
     overview,
@@ -152,6 +152,7 @@ const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> 
   const tags = parseListField(rawTags);
   const formattedDate = formatEventDate(date);
   const formattedTime = formatEventTime(time);
+  const bookingCount = await getBookingCountByEvent({ eventId: _id, slug });
   const similarEvents: SimilarEventSummary[] = await getSimilarEventsBySlug(slug);
 
 
@@ -188,12 +189,7 @@ const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> 
         <aside className="booking">
           <div className="signup-card">
             <h2>Book Your Spot</h2>
-            {booking > 0 ? (
-              <p>Join {booking} people who have already booked for this event!</p>
-            ) : (
-              <p>Be the first to book for this event!</p>
-            )}
-            <BookEvent />
+            <BookEvent eventId={eventData.event._id} slug={slug} initialBookings={bookingCount} />
           </div>
         </aside>
       </div>
@@ -218,6 +214,23 @@ const EventDetailsPage = async ({ params }: { params: Promise<{ slug: string }> 
 
     </section>
   )
+};
+
+const EventDetailsFallback = () => (
+  <section id="event">
+    <div className="header">
+      <h1>Event Description</h1>
+      <p>Loading event details...</p>
+    </div>
+  </section>
+);
+
+const EventDetailsPage = ({ params }: { params: Promise<{ slug: string }> }) => {
+  return (
+    <Suspense fallback={<EventDetailsFallback />}>
+      <EventDetailsContent params={params} />
+    </Suspense>
+  );
 };
 
 export default EventDetailsPage;
