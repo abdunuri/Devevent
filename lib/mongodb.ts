@@ -34,7 +34,11 @@ export default async function connectToDatabase(): Promise<typeof mongoose> {
   if (!cached.promise) {
     // Disable buffering so failed connections surface immediately.
     cached.promise = mongoose
-      .connect(mongoDbUri, { bufferCommands: false })
+      .connect(mongoDbUri, {
+        bufferCommands: false,
+        serverSelectionTimeoutMS: 10000,
+        socketTimeoutMS: 15000,
+      })
       .then((instance) => instance);
   }
 
@@ -46,7 +50,11 @@ export default async function connectToDatabase(): Promise<typeof mongoose> {
     cached.promise = null;
 
     const message = error instanceof Error ? error.message : "unknown";
-    if (/could not connect to any servers|replicasetnoprimary|whitelist/i.test(message)) {
+    if (
+      /could not connect to any servers|replicasetnoprimary|whitelist|econnreset|timed out|mongo(serverselection|network)/i.test(
+        message
+      )
+    ) {
       throw new Error(
         "Could not connect to MongoDB Atlas. Check Atlas Network Access (IP whitelist), cluster status, and MONGODB_URI."
       );

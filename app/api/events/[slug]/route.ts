@@ -118,10 +118,14 @@ export async function GET(
     const errorMessage =
       error instanceof Error ? error.message : "Unknown server error.";
 
-    if (/querySrv\s+ECONNREFUSED/i.test(errorMessage)) {
+    if (
+      /querySrv\s+ECONNREFUSED|replicasetnoprimary|econnreset|timed out|could not connect to mongodb atlas|mongoserverselectionerror|mongonetwork/i.test(
+        errorMessage
+      )
+    ) {
       return buildErrorResponse(
         "Database connection failed",
-        "DNS SRV lookup to MongoDB Atlas was refused. Verify DNS/network access or use a non-SRV MongoDB URI.",
+        "Database is temporarily unavailable. Verify Atlas network access, cluster health, and MONGODB_URI, then retry.",
         503
       );
     }
