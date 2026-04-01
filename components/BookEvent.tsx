@@ -9,24 +9,26 @@ const BookEvent = ({
 }: {
   eventId: string;
   slug: string;
-  initialBookings: number;
+  initialBookings: number | null;
 }) => {
     const [email, setEmail] = useState("");
     const [submitted, setSubmitted] = useState(false);
     const [bookingCount, setBookingCount] = useState(initialBookings);
+    const [error, setError] = useState<string | null>(null);
 
     const HandleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
+      setError(null);
       const { success, error, totalBookings } = await createBooking({ eventId, slug, email });
       if (success) {
         setSubmitted(true);
-        setBookingCount(totalBookings ?? bookingCount + 1);
+        setBookingCount(totalBookings ?? (bookingCount === null ? 1 : bookingCount + 1));
         posthog.capture("event_booked", {
           eventId,
           slug,
-          email,
         });
       } else {
+        setError("We couldn't complete your booking. Please try again.");
         console.error("Booking failed:", error);
         posthog.captureException(error)
       }
@@ -36,7 +38,9 @@ const BookEvent = ({
         };
       return (
         <div id="book-event">
-            {bookingCount > 0 ? (
+            {bookingCount === null ? (
+              <p>Booking count is currently unavailable. You can still book your spot.</p>
+            ) : bookingCount > 0 ? (
               <p>Join {bookingCount} people who have already booked for this event!</p>
             ) : (
               <p>Be the first to book for this event!</p>
@@ -59,6 +63,7 @@ const BookEvent = ({
                 <button  className="button-submit" type="submit">
                     Book Now
                 </button>
+                {error && <p className="error-message">{error}</p>}
               </form>
             )}
 

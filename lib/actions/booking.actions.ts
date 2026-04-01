@@ -40,7 +40,7 @@ export const getBookingCountByEvent = async ({ eventId, slug }: GetBookingCountI
         });
     } catch (error) {
         console.error("Failed to count bookings:", error);
-        return 0;
+        return null;
     }
 };
 
