@@ -12,6 +12,7 @@ const NavBar = () => {
                     <Link href="/">Home</Link>
                     <Link href="/events">Events</Link>
                     <Link href="/create">Create Event</Link>
+                  <Link href="/admin/pending">Admin</Link>
                 </ul>
         </nav>
     </header>

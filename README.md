@@ -34,3 +34,27 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Telegram Ingestion Pipeline
+
+This app uses a three-layer ingestion flow:
+
+1. `raw_posts` (all Telegram posts, deduplicated)
+2. `pending_events` (keyword-matched review queue, not public)
+3. `events` (approved public events only)
+
+### Admin Review UI
+
+- Route: `/admin/pending`
+- Actions:
+	- Edit before approval
+	- Approve (publishes to `events`)
+	- Reject (marks pending as rejected)
+
+### Admin API Endpoints
+
+- `GET /api/admin/pending?status=pending`
+- `POST /api/admin/pending/:id/approve`
+- `POST /api/admin/pending/:id/reject`
+
+`pending_events` are never shown on public pages.
