@@ -1,28 +1,27 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import LightRays from "@/components/LightRays";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import NavBar from "@/components/NavBar";
 import PostHogProvider from "@/components/PostHogProvider";
+import NavBarSlot from "@/components/NavBarSlot";
 
 export const metadata: Metadata = {
   title: "TECHVENT",
   description: "The hub for developers to share and discover events",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) {
   return (
     <html
       lang="en"
       className={cn("h-full", "antialiased", "font-sans")}>
       <body className="min-h-full flex flex-col min-h-screen">
       <PostHogProvider>
-      <NavBar />
-
+        <Suspense fallback={<NavBar />}>
+          <NavBarSlot />
+        </Suspense>
       <div className="absolute inset-0 top-0 z-[-1] min-h-screen">
         <LightRays
             raysOrigin="top-center"

@@ -1,7 +1,13 @@
+import { auth } from "@/auth";
 import ExploreBtn from "@/components/exploreBtn";
+import { SignInButton } from "@/components/Sign-in-Button";
+import { SignOutButton } from "@/components/Sign-out-Button";
 import Image from "next/image";
+import { Suspense } from "react";
 
-const page = () => {
+const HomeContent = async () => {
+  const session = await auth();
+
   return (
     <section id="home" className="flex flex-col gap-12 pb-10">
       <div className="relative overflow-hidden rounded-3xl border border-dark-200 bg-gradient-to-br from-[#0d1a22] via-[#0a1218] to-[#091015] p-8 card-shadow sm:p-12">
@@ -11,6 +17,7 @@ const page = () => {
         <div className="relative grid items-center gap-8 lg:grid-cols-[1.2fr_1fr]">
           <div>
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-primary">TECHVENT</p>
+            <p className="subheading max-w-2xl text-left"></p>
             <h1>The hub for every Tech event in Addis</h1>
             <p className="subheading max-w-2xl text-left">
               From high-energy hackathons to deep-dive engineering meetups, discover events that sharpen your skills,
@@ -73,6 +80,22 @@ const page = () => {
         </div>
       </div>
     </section>
+  );
+};
+
+const HomeFallback = () => (
+  <section id="home" className="flex flex-col gap-12 pb-10">
+    <div className="rounded-3xl border border-dark-200 bg-dark-100/80 p-8 sm:p-12">
+      <p className="text-light-200">Loading home page...</p>
+    </div>
+  </section>
+);
+
+const page = () => {
+  return (
+    <Suspense fallback={<HomeFallback />}>
+      <HomeContent />
+    </Suspense>
   );
 };
 

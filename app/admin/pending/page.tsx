@@ -88,6 +88,7 @@ export default function AdminPendingPage() {
   const [form, setForm] = useState<ApprovalForm>(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  
 
   const activeEvent = useMemo(
     () => pendingEvents.find((item) => item._id === activeEditId) ?? null,
