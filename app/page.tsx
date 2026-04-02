@@ -1,12 +1,9 @@
 import { auth } from "@/auth";
 import ExploreBtn from "@/components/exploreBtn";
-import { SignInButton } from "@/components/Sign-in-Button";
-import { SignOutButton } from "@/components/Sign-out-Button";
 import Image from "next/image";
 import { Suspense } from "react";
 
 const HomeContent = async () => {
-  const session = await auth();
 
   return (
     <section id="home" className="flex flex-col gap-12 pb-10">
@@ -17,12 +14,10 @@ const HomeContent = async () => {
         <div className="relative grid items-center gap-8 lg:grid-cols-[1.2fr_1fr]">
           <div>
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-primary">TECHVENT</p>
-            <p className="subheading max-w-2xl text-left"></p>
             <h1>The hub for every Tech event in Addis</h1>
             <p className="subheading max-w-2xl text-left">
               From high-energy hackathons to deep-dive engineering meetups, discover events that sharpen your skills,
-              expand your network, and launch your next opportunity.
-            </p>
+            {/* Empty paragraph element removed - no content was present */}            </p>
 
             <div className="mt-7 flex flex-wrap gap-2">
               <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">Hackathons</span>
