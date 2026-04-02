@@ -13,4 +13,5 @@ export default async function middleware(request: NextRequest) {
     if (isProtected && !session) {
         return NextResponse.redirect(new URL("/api/auth/signin", request.url));
     }
+    return NextResponse.next();
 }
