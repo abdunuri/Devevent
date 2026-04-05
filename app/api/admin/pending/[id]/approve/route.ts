@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import connectToDatabase from "@/lib/mongodb";
 import { PendingEvent } from "@/database/pending-event.model";
 import { Event } from "@/database/event.model";
+import { auth } from "@/auth";
+import { isOwnerAdminEmail } from "@/lib/admin-auth";
 import {
   v2 as cloudinary,
   type UploadApiErrorResponse,
@@ -209,6 +211,24 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json(
+        { message: "Approval failed", error: "You must be signed in." },
+        { status: 401 }
+      );
+    }
+
+    if (!isOwnerAdminEmail(session.user.email)) {
+      return NextResponse.json(
+        {
+          message: "Approval failed",
+          error: "Only the owner admin account can approve events.",
+        },
+        { status: 403 }
+      );
+    }
+
     await connectToDatabase();
     const { id } = await context.params;
 

@@ -13,6 +13,21 @@ export interface IPendingEvent {
   image?: string;
   eventDate: string | null;
   originalMessage: string;
+  parsedEvent?: {
+    title: string;
+    description: string;
+    overview: string;
+    venue: string;
+    location: string;
+    date: string;
+    time: string;
+    mode: string;
+    audience: string;
+    organizer: string;
+    tags: string[];
+    agenda: string[];
+    image: string;
+  };
   status: PendingEventStatus;
   approvedEventId?: mongoose.Types.ObjectId;
   reviewNotes?: string;
@@ -42,6 +57,25 @@ const pendingEventSchema = new Schema<IPendingEvent, PendingEventModelType>(
     image: { type: String, trim: true },
     eventDate: { type: String, default: null },
     originalMessage: { type: String, required: true, trim: true },
+    parsedEvent: {
+      type: {
+        title: { type: String, trim: true },
+        description: { type: String, trim: true },
+        overview: { type: String, trim: true },
+        venue: { type: String, trim: true },
+        location: { type: String, trim: true },
+        date: { type: String, trim: true },
+        time: { type: String, trim: true },
+        mode: { type: String, trim: true },
+        audience: { type: String, trim: true },
+        organizer: { type: String, trim: true },
+        tags: [{ type: String, trim: true }],
+        agenda: [{ type: String, trim: true }],
+        image: { type: String, trim: true },
+      },
+      required: false,
+      _id: false,
+    },
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],

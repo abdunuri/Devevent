@@ -11,6 +11,21 @@ interface PendingEventItem {
   eventDate: string | null;
   originalMessage: string;
   status: "pending" | "approved" | "rejected";
+  parsedEvent?: {
+    title: string;
+    description: string;
+    overview: string;
+    image: string;
+    venue: string;
+    location: string;
+    date: string;
+    time: string;
+    mode: string;
+    audience: string;
+    organizer: string;
+    tags: string[];
+    agenda: string[];
+  };
 }
 
 interface ApprovalForm {
@@ -63,6 +78,24 @@ function toInputDate(value: string | null): string {
 }
 
 function buildInitialForm(event: PendingEventItem): ApprovalForm {
+  if (event.parsedEvent) {
+    return {
+      title: event.parsedEvent.title,
+      description: event.parsedEvent.description,
+      overview: event.parsedEvent.overview,
+      image: event.parsedEvent.image,
+      venue: event.parsedEvent.venue,
+      location: event.parsedEvent.location,
+      date: event.parsedEvent.date,
+      time: event.parsedEvent.time,
+      mode: event.parsedEvent.mode,
+      audience: event.parsedEvent.audience,
+      organizer: event.parsedEvent.organizer,
+      tags: event.parsedEvent.tags.join(", "),
+      agenda: event.parsedEvent.agenda.join("\n"),
+    };
+  }
+
   return {
     title: event.title,
     description: event.description,

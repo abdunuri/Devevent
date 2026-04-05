@@ -2,12 +2,32 @@ import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import connectToDatabase from "@/lib/mongodb";
 import { PendingEvent } from "@/database/pending-event.model";
+import { auth } from "@/auth";
+import { isOwnerAdminEmail } from "@/lib/admin-auth";
 
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json(
+        { message: "Rejection failed", error: "You must be signed in." },
+        { status: 401 }
+      );
+    }
+
+    if (!isOwnerAdminEmail(session.user.email)) {
+      return NextResponse.json(
+        {
+          message: "Rejection failed",
+          error: "Only the owner admin account can reject events.",
+        },
+        { status: 403 }
+      );
+    }
+
     await connectToDatabase();
     const { id } = await context.params;
 
