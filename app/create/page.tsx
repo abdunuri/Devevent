@@ -18,24 +18,57 @@ type EventFormState = {
   agendas: string[];
 };
 
-const initialFormState: EventFormState = {
-  title: "",
-  description: "",
-  overview: "",
-  image: "",
-  venue: "",
-  location: "",
-  date: "",
-  time: "",
-  mode: "In-person",
-  audience: "",
-  organizer: "",
-  tags: "web, backend, startup",
-  agendas: [""],
-};
+function getLocalDateValue(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function getLocalTimeValue(): string {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+
+  return `${hours}:${minutes}`;
+}
+
+function createInitialFormState(): EventFormState {
+  return {
+    title: "",
+    description: "",
+    overview: "",
+    image: "",
+    venue: "",
+    location: "",
+    date: getLocalDateValue(),
+    time: getLocalTimeValue(),
+    mode: "in-person",
+    audience: "",
+    organizer: "",
+    tags: "",
+    agendas: [""],
+  };
+}
 
 const CreateEventPage = () => {
-  const [form, setForm] = useState<EventFormState>(initialFormState);
+  const [form, setForm] = useState<EventFormState>({
+    title: "",
+    description: "",
+    overview: "",
+    image: "",
+    venue: "",
+    location: "",
+    date: "",
+    time: "",
+    mode: "in-person",
+    audience: "",
+    organizer: "",
+    tags: "",
+    agendas: [""],
+  });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,6 +90,15 @@ const CreateEventPage = () => {
     setImagePreviewUrl(objectUrl);
     return () => URL.revokeObjectURL(objectUrl);
   }, [imageFile]);
+
+  useEffect(() => {
+    setForm((prev) => ({
+      ...prev,
+      date: prev.date || getLocalDateValue(),
+      time: prev.time || getLocalTimeValue(),
+      mode: prev.mode || "in-person",
+    }));
+  }, []);
 
   const handleFieldChange = <K extends keyof Omit<EventFormState, "agendas">>(
     key: K,
@@ -159,7 +201,7 @@ const CreateEventPage = () => {
       }
 
       setSuccessMessage(result.message ?? "Event created successfully.");
-      setForm(initialFormState);
+      setForm(createInitialFormState());
       setImageFile(null);
     } catch {
       setErrorMessage("Network error while creating event. Please retry.");
@@ -175,13 +217,12 @@ const CreateEventPage = () => {
           <p className="eyebrow">Create Event</p>
           <h1>Publish Your Next Tech Event</h1>
           <p className="hero-copy">
-          Fill out every detail, add agenda rows dynamically, and submit directly to the events API.
-          You can upload an image file (Cloudinary) or provide an image URL.
+          Fill out every detail
           </p>
           <div className="hero-notes">
             <span>Image: file upload or URL</span>
             <span>Tags: comma separated</span>
-            <span>Agenda: add rows dynamically</span>
+            <span>Agenda: One Agenda per row</span>
           </div>
         </div>
 
@@ -243,7 +284,7 @@ const CreateEventPage = () => {
             </div>
             <div className="field field-wide">
               <label htmlFor="tags">Tags (comma separated)</label>
-              <input id="tags" value={form.tags} onChange={(e) => handleFieldChange("tags", e.target.value)} required />
+              <input id="tags" value={form.tags} onChange={(e) => handleFieldChange("tags", e.target.value)} required placeholder="web, backend, startup" />
             </div>
           </div>
 
@@ -256,7 +297,7 @@ const CreateEventPage = () => {
               <div>
                 <h2>Agenda Items</h2>
                 <p>
-                Add one agenda per row. The form submits agenda as a JSON array string.
+                Add one agenda item per row.
                 </p>
               </div>
               <button type="button" onClick={addAgendaRow} className="agenda-add-btn">

@@ -86,7 +86,7 @@ const page = async() => {
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary">Discover Events</p>
             <h1 className="mb-3 text-5xl max-sm:text-4xl">Featured Tech Gatherings</h1>
             <p className="text-light-200 max-w-2xl text-base">
-              Handpicked opportunities to learn, connect, and build with the Addis tech community.
+              Handpicked opportunities to learn, connect, and build with Addis Ababa's tech communities.
               Find your next hackathon, meetup, or conference below.
             </p>
 
