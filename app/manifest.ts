@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Techvent",
-    short_name: "Techvent",
-    description: "Discover and share developer events",
+    name: "TECHVENT",
+    short_name: "TECHVENT",
+    description: "The Hub for Tech Events in Addis",
     start_url: "/",
     display: "standalone",
     background_color: "hsl(0, 0%, 0%)",

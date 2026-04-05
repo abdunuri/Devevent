@@ -1,11 +1,24 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import LightRays from "@/components/LightRays";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import NavBar from "@/components/NavBar";
 import PostHogProvider from "@/components/PostHogProvider";
 import NavBarSlot from "@/components/NavBarSlot";
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  weight: ["400", "500", "600", "700"],
+});
+
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
+  weight: ["400", "500", "600"],
+});
 
 export const metadata: Metadata = {
   title: "TECHVENT",
@@ -38,7 +51,7 @@ export default function RootLayout({children,}: Readonly<{children: React.ReactN
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", "font-sans")}>
+      className={cn("h-full", "antialiased", spaceGrotesk.variable, jetBrainsMono.variable)}>
       <body className="min-h-full flex flex-col min-h-screen">
       <PostHogProvider>
         <Suspense fallback={<NavBar />}>

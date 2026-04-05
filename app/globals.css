@@ -4,8 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-schibsted-grotesk: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-martian-mono: ui-monospace, "Cascadia Mono", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-schibsted-grotesk: var(--font-space-grotesk), "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-martian-mono: var(--font-jetbrains-mono), ui-monospace, "Cascadia Mono", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --color-blue: #94eaff;
   --color-light-100: #e7f2ff;
   --color-light-200: #bdbdbd;
@@ -114,7 +114,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-schibsted-grotesk;
   }
 
   main {
