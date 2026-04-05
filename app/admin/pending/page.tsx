@@ -77,6 +77,98 @@ function toInputDate(value: string | null): string {
   return parsed.toISOString().slice(0, 10);
 }
 
+function parseStructuredMessage(raw: string): ApprovalForm | null {
+  const text = raw.trim().replace(/^"|"$/g, "");
+  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  if (lines.length === 0) {
+    return null;
+  }
+
+  const data: Record<string, string> = {};
+  const agenda: string[] = [];
+  let currentKey: string | null = null;
+
+  for (const line of lines) {
+    const match = line.match(/^([A-Za-z]+)\s*:\s*(.*)$/);
+    if (match) {
+      const key = match[1].toLowerCase();
+      const value = match[2].trim();
+
+      if (key === "agenda") {
+        currentKey = "agenda";
+        if (value) {
+          agenda.push(value.replace(/^[-*]\s*/, "").trim());
+        }
+        continue;
+      }
+
+      if (
+        [
+          "title",
+          "description",
+          "overview",
+          "venue",
+          "location",
+          "date",
+          "time",
+          "mode",
+          "audience",
+          "organizer",
+          "tags",
+        ].includes(key)
+      ) {
+        data[key] = value;
+        currentKey = key;
+        continue;
+      }
+
+      if (currentKey === "agenda") {
+        agenda.push(line.replace(/^[-*]\s*/, "").trim());
+      }
+      continue;
+    }
+
+    if (currentKey === "agenda") {
+      agenda.push(line.replace(/^[-*]\s*/, "").trim());
+    }
+  }
+
+  const required = [
+    "title",
+    "description",
+    "overview",
+    "venue",
+    "location",
+    "date",
+    "time",
+    "mode",
+    "audience",
+    "organizer",
+    "tags",
+  ];
+
+  const missing = required.some((key) => !data[key]);
+  if (missing || agenda.length === 0) {
+    return null;
+  }
+
+  return {
+    title: data.title,
+    description: data.description,
+    overview: data.overview,
+    image: "",
+    venue: data.venue,
+    location: data.location,
+    date: data.date,
+    time: data.time,
+    mode: data.mode,
+    audience: data.audience,
+    organizer: data.organizer,
+    tags: data.tags,
+    agenda: agenda.join("\n"),
+  };
+}
+
 function buildInitialForm(event: PendingEventItem): ApprovalForm {
   if (event.parsedEvent) {
     return {
@@ -93,6 +185,14 @@ function buildInitialForm(event: PendingEventItem): ApprovalForm {
       organizer: event.parsedEvent.organizer,
       tags: event.parsedEvent.tags.join(", "),
       agenda: event.parsedEvent.agenda.join("\n"),
+    };
+  }
+
+  const parsedFromMessage = parseStructuredMessage(event.originalMessage);
+  if (parsedFromMessage) {
+    return {
+      ...parsedFromMessage,
+      image: event.image ?? parsedFromMessage.image,
     };
   }
 
