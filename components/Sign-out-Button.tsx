@@ -2,7 +2,11 @@
 import { usePostHog } from "posthog-js/react";
 import { logOut } from "@/lib/actions/auth";
 
-export const SignOutButton = () => {
+type SignOutButtonProps = {
+  className?: string;
+};
+
+export const SignOutButton = ({ className }: SignOutButtonProps) => {
   const posthog = usePostHog();
 
   const handleSignOut = async () => {
@@ -13,7 +17,13 @@ export const SignOutButton = () => {
 
   return (
     <form action={handleSignOut}>
-      <button className="mt-4 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary/80 " type="submit">
+      <button
+        className={
+          className ??
+          "rounded-full bg-primary px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-primary/80"
+        }
+        type="submit"
+      >
         Sign Out
       </button>
     </form>

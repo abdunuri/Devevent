@@ -10,6 +10,28 @@ import NavBarSlot from "@/components/NavBarSlot";
 export const metadata: Metadata = {
   title: "TECHVENT",
   description: "The hub for developers to share and discover events",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000"),
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icons/favicon.ico", type: "image/x-icon" },
+      { url: "/icons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/icons/apple-touch-icon.png",
+    shortcut: "/icons/favicon.ico",
+  },
+  openGraph: {
+    title: "TECHVENT",
+    description: "The hub for developers to share and discover events",
+    images: ["/icons/logo.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TECHVENT",
+    description: "The hub for developers to share and discover events",
+    images: ["/icons/logo.png"],
+  },
 };
 
 export default function RootLayout({children,}: Readonly<{children: React.ReactNode;}>) {
