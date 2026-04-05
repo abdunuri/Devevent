@@ -3,6 +3,7 @@ import ExploreBtn from "@/components/exploreBtn";
 import EventCard from "@/components/eventCard";
 import Image from "next/image";
 import { cacheLife } from "next/cache";
+import Link from "next/link";
 // import { events } from "@/lib/constants";
 
 interface EventSummary {
@@ -94,7 +95,9 @@ const page = async() => {
                 {eventCount} active events
               </span>
               <span className="rounded-full border border-dark-200 bg-dark-100 px-3 py-1 text-xs font-semibold text-light-200">
-                Updated frequently
+                <Link href="/create" className="text-light-200 hover:text-primary">
+                  <strong>SignIn</strong>
+                </Link> To Add Your Events
               </span>
             </div>
 
@@ -109,6 +112,7 @@ const page = async() => {
               ))}
             </div>
           </div>
+          
 
           <div className="relative h-56 overflow-hidden rounded-2xl border border-dark-200 bg-dark-100">
             <Image

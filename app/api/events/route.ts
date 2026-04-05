@@ -1,5 +1,7 @@
 import connectToDatabase from "@/lib/mongodb";
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { syncUserFromSession } from "@/lib/auth-user";
 // add unsplash source to next.config.js
 // images: { domains: ['images.unsplash.com'] }
 import {
@@ -208,6 +210,15 @@ function normalizeEventPayload(payload: EventPayload): CreateEventInput {
 
 export async function POST(req: NextRequest) {
     try {
+        const session = await auth();
+        if (!session?.user) {
+            return NextResponse.json(
+                { message: "Unauthorized", error: "You must be signed in to create events." },
+                { status: 401 }
+            );
+        }
+
+        await syncUserFromSession(session);
         await connectToDatabase();
 
         const { payload, formData } = await parseEventPayload(req);

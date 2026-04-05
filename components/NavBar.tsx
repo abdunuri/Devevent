@@ -10,10 +10,11 @@ const NavBar = () => {
                 <Image src="/icons/logo.png" alt="logo" width={24} height={24}/>
                 <p>TECHVENT</p>
             </Link>
-                <ul>
-                    <li><Link href="/">Home</Link></li>
-                    <li><Link href="/events">Events</Link></li>
-                </ul>        </nav>
+            <ul>
+                <Link href="/">Home</Link>
+                <Link href="/events">Events</Link>
+            </ul>        
+        </nav>
     </header>
   );
 };
@@ -30,7 +31,6 @@ const AdminNavBar = () => {
                     <Link href="/">Home</Link>
                     <Link href="/events">Events</Link>
                     <Link href="/create">Create Event</Link>
-                    <Link href="/admin/pending">Admin</Link>
                     <SignOutButton></SignOutButton>
                 </ul>
         </nav>

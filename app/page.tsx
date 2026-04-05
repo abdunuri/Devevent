@@ -1,9 +1,11 @@
 import { auth } from "@/auth";
 import ExploreBtn from "@/components/exploreBtn";
+import { SignInButton } from "@/components/Sign-in-Button";
 import Image from "next/image";
 import { Suspense } from "react";
 
 const HomeContent = async () => {
+  const session = await auth();
 
   return (
     <section id="home" className="flex flex-col gap-12 pb-10">
@@ -25,8 +27,11 @@ const HomeContent = async () => {
               <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">Conferences</span>
               <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">Workshops</span>
             </div>
-
-            <ExploreBtn />
+            {/* both buttons or components side by side */}
+            <div className="mt-7 flex flex-wrap items-center gap-4">
+              {!session?.user && <SignInButton />}
+              <ExploreBtn />
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
