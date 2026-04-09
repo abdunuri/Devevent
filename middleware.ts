@@ -66,8 +66,9 @@ export default async function middleware(request: NextRequest) {
     const session = await auth();
     const { pathname } = request.nextUrl;
     const isApiRoute = pathname.startsWith("/api/");
+    const isAuthApiRoute = pathname.startsWith("/api/auth/");
 
-    if (isApiRoute && !isApiRequestFromAllowedOrigin(request)) {
+    if (isApiRoute && !isAuthApiRoute && !isApiRequestFromAllowedOrigin(request)) {
         return NextResponse.json(
             {
                 message: "Forbidden",
