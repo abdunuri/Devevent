@@ -1,60 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DevEvent
 
-## Getting Started
+DevEvent is a Next.js event discovery and review platform for developer-focused events.
 
-First, run the development server:
+## Main Concept
+
+The app separates event ingestion from public publishing. Telegram posts are stored and reviewed before they become public event pages, which keeps the discovery experience clean while still allowing fast collection from channels.
+
+## Core Flow
+
+1. Telegram worker stores every accepted post in `raw_posts`.
+2. Keyword-matched and strictly formatted posts become `pending_events`.
+3. Admins review pending events at `/admin/pending`.
+4. Approved records are published to `events`.
+5. Rejected records stay out of the public event feed.
+
+## App Features
+
+- Public event discovery pages
+- Event detail pages by slug
+- Event creation UI
+- Admin pending-event review
+- Approve and reject endpoints
+- Booking/admin panel components
+- Authentication-aware navigation components
+- MongoDB-backed event workflow
+
+## Tech Stack
+
+- Next.js App Router
+- TypeScript
+- React
+- MongoDB
+- Tailwind CSS
+- Clerk/Auth-related UI components
+
+## Run Locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Important Routes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `/events` - public event list
+- `/events/[slug]` - event detail
+- `/create` - create event page
+- `/admin/pending` - review queue
+- `/api/admin/pending/:id/approve` - approve pending event
+- `/api/admin/pending/:id/reject` - reject pending event
 
-## Learn More
+## Related Repo
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## Telegram Ingestion Pipeline
-
-This app uses a three-layer ingestion flow:
-
-1. `raw_posts` (all Telegram posts, deduplicated)
-2. `pending_events` (keyword-matched review queue, not public)
-3. `events` (approved public events only)
-
-### Admin Review UI
-
-- Route: `/admin/pending`
-- Actions:
-	- Edit before approval
-	- Approve (publishes to `events`)
-	- Reject (marks pending as rejected)
-
-### Admin API Endpoints
-
-- `GET /api/admin/pending?status=pending`
-- `POST /api/admin/pending/:id/approve`
-- `POST /api/admin/pending/:id/reject`
-
-`pending_events` are never shown on public pages.
+`devevent-tg` contains the Telegram ingestion worker that feeds the pending review workflow.
